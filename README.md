@@ -34,4 +34,24 @@ var res= client.GetDatabase(3);
 // 使用db的扩展方法
 res.Set("asdasd","mkmkmkmk",200) // 和client中的基本方法一致。
 ```
+- 分布式锁
+```csharp
+// 获取锁
+var client = _serviceProvider.GetService<IPlutoRedisClient>();
+client.Lock("admin_lock",100) // return bool 
+
+// 解锁
+client.UnLock("admin_lock")
+```
+- 发布订阅
+```csharp
+var client = _serviceProvider.GetService<IPlutoRedisClient>();
+// 发布
+client.Publish<User>("demo",new User{Id=111111});
+
+// 订阅
+client.Subscribe("demo",Action<string> callback);
+```
+
+
 
