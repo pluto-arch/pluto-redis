@@ -25,7 +25,7 @@ namespace FunctionsTest
             {
                 o.DefaultDbNumber = 0;
                 o.InstanceName = "test";
-                o.Password = "password";
+                o.Password = "pluto1002";
                 o.MasterName = "redis-master";
                 o.IsSentinelModel = true;
                 o.AllowAdmin = true;
@@ -33,9 +33,9 @@ namespace FunctionsTest
                 o.RedisAddress=new Dictionary<int, string>
                 {
                     // this is sentinel model endpoint
-                    {26379,"127.0.0.1"},
-                    {26380,"127.0.0.1"},
-                    {26381,"127.0.0.1"},
+                    {26379,"0.0.0.0"},
+                    {26380,"0.0.0.0"},
+                    {26381,"0.0.0.0"},
                 };
             });
             services.AddSingleton<IPlutoRedisClient, PlutoRedisClient>();

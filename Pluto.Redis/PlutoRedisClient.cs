@@ -63,25 +63,26 @@ namespace Pluto.Redis
         }
         private ConnectionMultiplexer GetConnection()
         {
-            var sentinelOptions = new ConfigurationOptions();
+            var option = new ConfigurationOptions();
             foreach (var item in _addressDic)
             {
-                sentinelOptions.EndPoints.Add(item.Value, item.Key);
+                option.EndPoints.Add(item.Value, item.Key);
             }
-            sentinelOptions.CommandMap = _options.IsSentinelModel ? CommandMap.Sentinel : CommandMap.Default;
-            sentinelOptions.AbortOnConnectFail = false;
+            option.CommandMap = _options.IsSentinelModel ? CommandMap.Sentinel : CommandMap.Default;
+            option.AbortOnConnectFail = false;
+            option.Password = _password;
+            option.AllowAdmin = _allowAdmin;
+            option.KeepAlive = _keepAlive;
+            option.AbortOnConnectFail = false;
+            option.ClientName = _instanceName;
             if (!_options.IsSentinelModel)
             {
-                sentinelOptions.ClientName = _instanceName;
-                sentinelOptions.Password = _password;
-                sentinelOptions.AllowAdmin = _allowAdmin;
-                sentinelOptions.KeepAlive = _keepAlive;
-                sentinelOptions.AbortOnConnectFail = false;
-                return ConnectionMultiplexer.Connect(sentinelOptions);
+                return ConnectionMultiplexer.Connect(option);
             }
-            var conn = ConnectionMultiplexer.Connect(sentinelOptions);
+            option.TieBreaker = "";
+            option.DefaultVersion = new Version(3, 0);
+            var conn = ConnectionMultiplexer.Connect(option);
             var redisServiceOptions = new ConfigurationOptions();
-            redisServiceOptions.ClientName = _instanceName;
             redisServiceOptions.ServiceName = _redisMasterName;
             redisServiceOptions.Password = _password;
             redisServiceOptions.AllowAdmin = _allowAdmin;
