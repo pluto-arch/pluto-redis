@@ -33,9 +33,9 @@ namespace FunctionsTest
                 o.RedisAddress = new Dictionary<int, string>
                 {
                     // this is sentinel model endpoint
-                    {26379,"123.57.71.234"},
-                    {26380,"123.57.71.234"},
-                    {26381,"123.57.71.234"},
+                    {26379,"127.0.0.1"},
+                    {26380,"127.0.0.1"},
+                    {26381,"127.0.0.1"},
                 };
             });
             _serviceProvider = services.BuildServiceProvider();
@@ -54,6 +54,10 @@ namespace FunctionsTest
             res =await aaa.SetAsync("demo2", () => JsonSerializer.Serialize<Demo>(new Demo { Name = "123" }), 222);
 
             Assert.IsTrue(res);
+
+            var ddd = aaa.Get("demo");
+            var ddd3 = aaa.Get<Demo>("demo2", (str) => JsonSerializer.Deserialize<Demo>(str));
+            Assert.IsTrue(ddd!=null);
         }
 
         [Test]
