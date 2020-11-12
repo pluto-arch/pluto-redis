@@ -26,6 +26,12 @@ services.AddPlutoRedis(o =>
 ```csharp
 var client = _serviceProvider.GetService<IPlutoRedisClient>();
 var res= client.Set("demo", "123123qweqwew",3600);
+// 使用自己的序列化工具
+var res= client.Set("demo", ()=>JsonSerializer.Serialize<Demo>(new Demo { Name="123"}),3600);
+
+ var str = aaa.Get("demo");
+ var model = aaa.Get<Demo>("demo2", (str) => JsonSerializer.Deserialize<Demo>(str));
+
 ```
 - 获取db
 ```csharp
@@ -33,24 +39,26 @@ var client = _serviceProvider.GetService<IPlutoRedisClient>();
 var res= client.GetDatabase(3);
 // 使用db的扩展方法
 res.Set("asdasd","mkmkmkmk",200) // 和client中的基本方法一致。
+res.Set("asdasd",()=>JsonSerializer.Serialize<Demo>(new Demo { Name="123"}),200) 
 ```
+
 - 分布式锁
 ```csharp
 // 获取锁
 var client = _serviceProvider.GetService<IPlutoRedisClient>();
-client.Lock("admin_lock",100) // return bool 
+client.Lock("admin_lock",token,100) // return bool 
 
 // 解锁
-client.UnLock("admin_lock")
+client.UnLock("admin_lock",token)
 ```
 - 发布订阅
 ```csharp
 var client = _serviceProvider.GetService<IPlutoRedisClient>();
 // 发布
-client.Publish<User>("demo",new User{Id=111111});
+client.Publish<User>("demo",()=>JsonSerializer.Serialize(new { a="12321"}));
 
 // 订阅
-client.Subscribe("demo",Action<string> callback);
+client.Subscribe("demo",Action<channel,string> callback);
 ```
 
 
