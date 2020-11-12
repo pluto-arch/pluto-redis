@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
-
 using Microsoft.Extensions.Options;
-
-using Newtonsoft.Json;
 
 using Pluto.Redis.Interfaces;
 using Pluto.Redis.Options;
-
 using StackExchange.Redis;
 
 namespace Pluto.Redis
@@ -46,10 +42,10 @@ namespace Pluto.Redis
             _allowAdmin = _options.AllowAdmin;
             _connections ??= new ConcurrentDictionary<string, ConnectionMultiplexer>();
             _password = _options.Password;
-            _redisMasterName = _options.IsSentinelModel ? _options.MasterName ?? throw new Exception("Redis master name can not be null") : _options.MasterName;
+            _redisMasterName = _options.IsSentinelModel ? _options.MasterName ?? throw new Exception("redis master name can not be null") : _options.MasterName;
             _addressDic = _options.RedisAddress ?? throw new Exception("redis connect address can not be null");
             var redisConnection = GetConnect();
-            _connectionMultiplexer = redisConnection ?? throw new Exception("Redis connection failed");
+            _connectionMultiplexer = redisConnection ?? throw new Exception("redis connection failed");
             _database = redisConnection.GetDatabase(_options.DefaultDbNumber);
         }
 
@@ -132,8 +128,7 @@ namespace Pluto.Redis
         /// <returns>返回是否执行成功。</returns>
         public bool Set(string key, string value, int seconds)
         {
-            TimeSpan expiry = TimeSpan.FromSeconds(seconds);
-            return _database.StringSet(key, value, expiry);
+            return _database.StringSet(key, value, TimeSpan.FromSeconds(seconds));
         }
 
         /// <summary>
@@ -144,10 +139,9 @@ namespace Pluto.Redis
         /// <param name="value">值。</param>
         /// <param name="expiry">过期时间（时间间隔）。</param>
         /// <returns>返回是否执行成功。</returns>
-        public bool Set<T>(string key, T value, TimeSpan? expiry = null)
+        public bool Set(string key, Func<string> serializaFun, TimeSpan? expiry = null)
         {
-            var data = JsonConvert.SerializeObject(value);
-            return _database.StringSet(key, data, expiry);
+            return _database.StringSet(key, serializaFun.Invoke(), expiry);
         }
 
         /// <summary>
@@ -158,27 +152,27 @@ namespace Pluto.Redis
         /// <param name="value">值。</param>
         /// <param name="seconds">过期时间（秒）。</param>
         /// <returns>返回是否执行成功。</returns>
-        public bool Set<T>(string key, T value, int seconds)
+        /// <example>
+        /// client.Set<User>("key",()=>JsonConvert.Serialize<User>(strValue))
+        /// </example>
+        public bool Set(string key, Func<string> serializaFun, int seconds)
         {
-            TimeSpan expiry = TimeSpan.FromSeconds(seconds);
-            var data = JsonConvert.SerializeObject(value);
-            return _database.StringSet(key, data, expiry);
+            return _database.StringSet(key, serializaFun.Invoke(), TimeSpan.FromSeconds(seconds));
         }
 
         /// <summary>
         /// 获取一个对象。
         /// </summary>
-        /// <param name="key">值。</param>
-        /// <returns>返回对象的值。</returns>
-        public T Get<T>(string key)
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="callBack"></param>
+        /// <returns></returns>
+        /// <example>
+        /// client.Get<User>("key",(strValue)=>JsonConvert.Deserialize<User>(strValue))
+        /// </example>
+        public T Get<T>(string key, Func<string,T> callBack)
         {
-            string json = _database.StringGet(key);
-            if (string.IsNullOrWhiteSpace(json))
-            {
-                return default(T);
-            }
-            T entity = JsonConvert.DeserializeObject<T>(json);
-            return entity;
+            return callBack(_database.StringGet(key));
         }
 
         /// <summary>
@@ -230,8 +224,7 @@ namespace Pluto.Redis
         /// <returns>返回是否执行成功。</returns>
         public bool SetExpire(string key, int seconds)
         {
-            TimeSpan expiry = TimeSpan.FromSeconds(seconds);
-            return _database.KeyExpire(key, expiry);
+            return _database.KeyExpire(key, TimeSpan.FromSeconds(seconds));
         }
 
         #endregion
@@ -259,8 +252,7 @@ namespace Pluto.Redis
         /// <returns>返回是否执行成功。</returns>
         public async Task<bool> SetAsync(string key, string value, int seconds)
         {
-            TimeSpan expiry = TimeSpan.FromSeconds(seconds);
-            return await _database.StringSetAsync(key, value, expiry);
+            return await _database.StringSetAsync(key, value, TimeSpan.FromSeconds(seconds));
         }
 
         /// <summary>
@@ -270,11 +262,29 @@ namespace Pluto.Redis
         /// <typeparam name="T">对象的类型。</typeparam>
         /// <param name="value">值。</param>
         /// <returns>返回是否执行成功。</returns>
-        public async Task<bool> SetAsync<T>(string key, T value)
+        /// <example>
+        /// client.SetAsync<User>("key",()=>JsonConvert.Serialize<User>(strValue))
+        /// </example>
+        public async Task<bool> SetAsync(string key, Func<string> serializeFunc, TimeSpan? expiry = null)
         {
-            var data = JsonConvert.SerializeObject(value);
-            return await _database.StringSetAsync(key, data);
+            return await _database.StringSetAsync(key, serializeFunc.Invoke(), expiry);
         }
+
+        /// <summary>
+        /// 异步添加一个对象。
+        /// </summary>
+        /// <param name="key">键。</param>
+        /// <typeparam name="T">对象的类型。</typeparam>
+        /// <param name="value">值。</param>
+        /// <returns>返回是否执行成功。</returns>
+        /// <example>
+        /// client.SetAsync<User>("key",()=>JsonConvert.Serialize<User>(strValue))
+        /// </example>
+        public async Task<bool> SetAsync(string key, Func<string> serializeFunc, int seconds)
+        {
+            return await _database.StringSetAsync(key, serializeFunc.Invoke(), TimeSpan.FromSeconds(seconds));
+        }
+
 
         /// <summary>
         /// 异步获取一个对象。
@@ -282,15 +292,12 @@ namespace Pluto.Redis
         /// <typeparam name="T">对象的类型。</typeparam>
         /// <param name="key">值。</param>
         /// <returns>返回对象的值。</returns>
-        public async Task<T> GetAsync<T>(string key)
+        /// <example>
+        /// client.GetAsync<User>("key",(strValue)=>JsonConvert.Deserialize<User>(strValue))
+        /// </example>
+        public async Task<T> GetAsync<T>(string key,Func<string,T> callback)
         {
-            string json = await _database.StringGetAsync(key);
-            if (string.IsNullOrWhiteSpace(json))
-            {
-                return default(T);
-            }
-            T entity = JsonConvert.DeserializeObject<T>(json);
-            return entity;
+            return callback(await _database.StringGetAsync(key));
         }
 
         /// <summary>
@@ -321,8 +328,7 @@ namespace Pluto.Redis
         /// <returns>返回是否执行成功。</returns>
         public async Task<bool> SetExpireAsync(string key, int seconds)
         {
-            TimeSpan expiry = TimeSpan.FromSeconds(seconds);
-            return await _database.KeyExpireAsync(key, expiry);
+            return await _database.KeyExpireAsync(key, TimeSpan.FromSeconds(seconds));
         }
 
         /// <summary>
@@ -341,19 +347,14 @@ namespace Pluto.Redis
         #region 锁相关操作
 
         /// <summary>
-        /// 分布式锁 Token。
-        /// </summary>
-        private static readonly RedisValue LockToken = Environment.MachineName;
-
-        /// <summary>
         /// 获取锁。
         /// </summary>
         /// <param name="key">锁名称。</param>
         /// <param name="seconds">过期时间（秒）。</param>
         /// <returns>是否已锁。</returns>
-        public bool Lock(string key, int seconds)
+        public bool Lock(string key,string token, int seconds)
         {
-            return _database.LockTake(key, LockToken, TimeSpan.FromSeconds(seconds));
+            return _database.LockTake(key, token, TimeSpan.FromSeconds(seconds));
         }
 
         /// <summary>
@@ -361,9 +362,9 @@ namespace Pluto.Redis
         /// </summary>
         /// <param name="key">锁名称。</param>
         /// <returns>是否成功。</returns>
-        public bool UnLock(string key)
+        public bool UnLock(string key,string token)
         {
-            return _database.LockRelease(key, LockToken);
+            return _database.LockRelease(key, token);
         }
 
         /// <summary>
@@ -372,9 +373,9 @@ namespace Pluto.Redis
         /// <param name="key">锁名称。</param>
         /// <param name="seconds">过期时间（秒）。</param>
         /// <returns>是否成功。</returns>
-        public async Task<bool> LockAsync(string key, int seconds)
+        public async Task<bool> LockAsync(string key, string token, int seconds)
         {
-            return await _database.LockTakeAsync(key, LockToken, TimeSpan.FromSeconds(seconds));
+            return await _database.LockTakeAsync(key, token, TimeSpan.FromSeconds(seconds));
         }
 
         /// <summary>
@@ -382,9 +383,9 @@ namespace Pluto.Redis
         /// </summary>
         /// <param name="key">锁名称。</param>
         /// <returns>是否成功。</returns>
-        public async Task<bool> UnLockAsync(string key)
+        public async Task<bool> UnLockAsync(string key, string token)
         {
-            return await _database.LockReleaseAsync(key, LockToken);
+            return await _database.LockReleaseAsync(key, token);
         }
 
         #endregion
@@ -405,11 +406,10 @@ namespace Pluto.Redis
         /// <param name="channel"></param>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public long Publish<T>(string channel, T msg)
+        public long Publish(string channel, Func<string> serializaFun)
         {
             var sub = this.GetPublisher();
-            var messageString = JsonConvert.SerializeObject(msg);
-            return sub.Publish(channel, messageString);
+            return sub.Publish(channel, serializaFun.Invoke());
         }
 
         /// <summary>
@@ -417,12 +417,12 @@ namespace Pluto.Redis
         /// </summary>
         /// <param name="subChannel"></param>
         /// <param name="callback"></param>
-        public void Subscribe(string subChannel, Action<string> callback)
+        public void Subscribe(string subChannel, Action<RedisChannel,string> callback)
         {
             var sub = this.GetPublisher();
             sub.Subscribe(subChannel, (channel, message) =>
             {
-                callback(message);
+                callback(channel, message);
             });
         }
         /// <summary>
