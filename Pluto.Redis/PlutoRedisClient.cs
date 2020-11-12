@@ -153,7 +153,7 @@ namespace Pluto.Redis
         /// <param name="seconds">过期时间（秒）。</param>
         /// <returns>返回是否执行成功。</returns>
         /// <example>
-        /// client.Set<User>("key",()=>JsonConvert.Serialize<User>(strValue))
+        /// client.Set<User>("key",()=>JsonConvert.Serialize<User>(new User()))
         /// </example>
         public bool Set(string key, Func<string> serializaFun, int seconds)
         {
@@ -263,7 +263,7 @@ namespace Pluto.Redis
         /// <param name="value">值。</param>
         /// <returns>返回是否执行成功。</returns>
         /// <example>
-        /// client.SetAsync<User>("key",()=>JsonConvert.Serialize<User>(strValue))
+        /// client.SetAsync<User>("key",()=>JsonConvert.Serialize<User>(new User()))
         /// </example>
         public async Task<bool> SetAsync(string key, Func<string> serializeFunc, TimeSpan? expiry = null)
         {
@@ -278,7 +278,7 @@ namespace Pluto.Redis
         /// <param name="value">值。</param>
         /// <returns>返回是否执行成功。</returns>
         /// <example>
-        /// client.SetAsync<User>("key",()=>JsonConvert.Serialize<User>(strValue))
+        /// client.SetAsync<User>("key",()=>JsonConvert.Serialize<User>(new User()))
         /// </example>
         public async Task<bool> SetAsync(string key, Func<string> serializeFunc, int seconds)
         {
