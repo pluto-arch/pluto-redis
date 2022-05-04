@@ -11,11 +11,14 @@ using StackExchange.Redis;
 
 namespace Pluto.Redis
 {
-    public class PlutoRedisClient : IPlutoRedisClient, IDisposable
+    public class PlutoRedisClient : IPlutoRedisClient, IDisposable,IAsyncDisposable
     {
-        private readonly IConnectionMultiplexer _connectionMultiplexer;
-        private ConcurrentDictionary<string, ConnectionMultiplexer> _connections;
+        private Lazy<ConnectionMultiplexer> connectionLazy = new Lazy<ConnectionMultiplexer>();
+        
+        private readonly IConnectionMultiplexer _connectionMultiplexer = null;
         private readonly IDatabase _database;
+
+        
         /// <summary>
         /// 选项
         /// </summary>
@@ -26,6 +29,7 @@ namespace Pluto.Redis
         private int _keepAlive;
         private bool _allowAdmin;
         private Dictionary<int, string> _addressDic;
+        private bool disposedValue;
 
         /// <summary>
         /// 初始化 <see cref="RedisClient"/> 类的新实例。
@@ -40,23 +44,23 @@ namespace Pluto.Redis
             _instanceName = _options.InstanceName;
             _keepAlive = _options.KeepAlive;
             _allowAdmin = _options.AllowAdmin;
-            _connections ??= new ConcurrentDictionary<string, ConnectionMultiplexer>();
             _password = _options.Password;
             _redisMasterName = _options.IsSentinelModel ? _options.MasterName ?? throw new Exception("redis master name can not be null") : _options.MasterName;
             _addressDic = _options.RedisAddress ?? throw new Exception("redis connect address can not be null");
-            var redisConnection = GetConnect();
-            _connectionMultiplexer = redisConnection ?? throw new Exception("redis connection failed");
-            _database = redisConnection.GetDatabase(_options.DefaultDbNumber);
+            InitConnection();
+            _connectionMultiplexer = connectionLazy.Value ?? throw new Exception("redis connection failed");
+            _database = connectionLazy.Value.GetDatabase(_options.DefaultDbNumber);
         }
 
         /// <summary>
         /// 获取ConnectionMultiplexer
         /// </summary>
         /// <returns></returns>
-        private ConnectionMultiplexer GetConnect()
+        private void InitConnection()
         {
-            return _connections.GetOrAdd(_instanceName, p => GetConnection());
+            connectionLazy = new Lazy<ConnectionMultiplexer>(GetConnection);
         }
+
         private ConnectionMultiplexer GetConnection()
         {
             var option = new ConfigurationOptions();
@@ -442,18 +446,43 @@ namespace Pluto.Redis
             var sub = this.GetPublisher();
             sub.UnsubscribeAll();
         }
-        #endregion
 
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
-        public void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
-            if (_connections != null && _connections.Count > 0)
+            if (!disposedValue)
             {
-                foreach (var item in _connections.Values)
+                if (disposing)
                 {
-                    item.Close();
+                    // TODO: 释放托管状态(托管对象)
+                    connectionLazy.Value?.Close();
                 }
+
+                // TODO: 释放未托管的资源(未托管的对象)并重写终结器
+                // TODO: 将大型字段设置为 null
+                disposedValue = true;
             }
         }
+
+        // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
+        // ~PlutoRedisClient()
+        // {
+        //     // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            this.Dispose(true);
+            return ValueTask.CompletedTask;
+        }
+        #endregion
+
     }
 }

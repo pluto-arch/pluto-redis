@@ -26,16 +26,13 @@ namespace FunctionsTest
                 o.DefaultDbNumber = 0;
                 o.InstanceName = "test";
                 o.Password = "pluto1002";
-                o.MasterName = "redis-master";
-                o.IsSentinelModel = true;
+                //o.MasterName = "redis-master";
+                o.IsSentinelModel = false;
                 o.AllowAdmin = true;
                 o.KeepAlive = 180;
                 o.RedisAddress = new Dictionary<int, string>
                 {
-                    // this is sentinel model endpoint
-                    {26379,"127.0.0.1"},
-                    {26380,"127.0.0.1"},
-                    {26381,"127.0.0.1"},
+                    {6379,"127.0.0.1"},
                 };
             });
             _serviceProvider = services.BuildServiceProvider();
