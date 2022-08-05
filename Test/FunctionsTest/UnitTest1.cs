@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
-
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Pluto.Redis;
 using Pluto.Redis.Extensions;
-using Pluto.Redis.Interfaces;
-using Pluto.Redis.Options;
+using StackExchange.Redis;
 
 namespace FunctionsTest
 {
@@ -21,18 +19,26 @@ namespace FunctionsTest
         public void Setup()
         {
             var services = new ServiceCollection();
+
+            //services.CreateRedisClientBuilder()
+            //    .ConnectTo(new Dictionary<string, int>
+            //    {
+            //        {"localhost",49153},
+            //    }).Build();
+
+
+            //services.AddRedisClient(builder =>builder.ConnectTo(null).UseAuth("").Build());
+
             services.AddPlutoRedis(o =>
             {
-                o.DefaultDbNumber = 0;
+                o.CommandMap=CommandMap.Default;
+                o.DefaultDataBase = 0;
                 o.InstanceName = "test";
-                o.Password = "pluto1002";
-                //o.MasterName = "redis-master";
-                o.IsSentinelModel = false;
-                o.AllowAdmin = true;
+                o.Password = "redispw";
                 o.KeepAlive = 180;
-                o.RedisAddress = new Dictionary<int, string>
+                o.RedisAddress = new Dictionary<string, int>
                 {
-                    {6379,"127.0.0.1"},
+                    {"localhost",49153},
                 };
             });
             _serviceProvider = services.BuildServiceProvider();
@@ -41,30 +47,31 @@ namespace FunctionsTest
         [Test]
         public async Task StringSet()
         {
-            var aaa = _serviceProvider.GetService<IPlutoRedisClient>();
-            var res= aaa.Set("demo", "123123qweqwew",3600);
+            var aaa = _serviceProvider.GetRequiredService<RedisClient>();
+            var res= await aaa.Db.SetAsync("demo", "123123qweqwew",3600);
 
-            res = aaa.Set("demo2",()=>JsonSerializer.Serialize<Demo>(new Demo { Name="123"}),222);
-
-            Assert.IsTrue(res);
-
-            res =await aaa.SetAsync("demo2", () => JsonSerializer.Serialize<Demo>(new Demo { Name = "123" }), 222);
+            res = await aaa.Db.SetAsync("demo2",()=>JsonSerializer.Serialize<Demo>(new Demo { Name="123"}),222);
 
             Assert.IsTrue(res);
 
-            var ddd = aaa.Get("demo");
-            var ddd3 = aaa.Get<Demo>("demo2", (str) => JsonSerializer.Deserialize<Demo>(str));
+            res =await aaa.Db.SetAsync("demo2", () => JsonSerializer.Serialize<Demo>(new Demo { Name = "123" }), 222);
+
+            Assert.IsTrue(res);
+
+            var ddd = await aaa.Db.GetAsync("demo");
+            var ddd3 = aaa.Db.Get<Demo>("demo2", (str) => JsonSerializer.Deserialize<Demo>(str));
             Assert.IsTrue(ddd!=null);
+
+
+            await aaa[1].SetAsync("hds", "sdsd", 10);
         }
 
         [Test]
         public void DatabaseExtensionMethod()
         {
-            
-            var client = _serviceProvider.GetService<IPlutoRedisClient>();
-            var aaa = _serviceProvider.GetService<IPlutoRedisClient>();
+            var aaa = _serviceProvider.GetRequiredService<RedisClient>();
             var res = aaa.GetDatabase(3);
-            Assert.IsTrue(res.Set("asdasd", "mkmkmkmk", 200)); // extension method 
+            Assert.IsTrue(res.Set("asdasd", "mkmkmkmk", 200)); 
 
             Assert.IsTrue(res.Set("asdasd", () => JsonSerializer.Serialize<Demo>(new Demo { Name = "123" }), 200)); // extension method 
         }
@@ -78,12 +85,12 @@ namespace FunctionsTest
         [Test]
         public void PubAndSub()
         {
-            var client1 = _serviceProvider.GetService<IPlutoRedisClient>();
-            client1.Publish("demo", ()=>JsonSerializer.Serialize(new { a="12321"}));
+            var client1 = _serviceProvider.GetRequiredService<RedisClient>();
+            client1.Sub.Publish("demo", ()=>JsonSerializer.Serialize(new { a="12321"}));
 
 
-            var client2 = _serviceProvider.GetService<IPlutoRedisClient>();
-            client2.Subscribe("demo", (cjennel, message) => {
+            var client2 = _serviceProvider.GetRequiredService<RedisClient>();
+            client2.Sub.Subscribe("demo", (cjennel, message) => {
                 var model = JsonSerializer.Deserialize<dynamic>(message);
                 Assert.AreEqual("12321", model.a);
             });
@@ -93,16 +100,16 @@ namespace FunctionsTest
         [Test]
         public void Lock()
         {
-            var aaa = _serviceProvider.GetService<IPlutoRedisClient>();
-            Assert.IsTrue(aaa.Lock("admin_lock",Environment.MachineName,100));
+            var aaa = _serviceProvider.GetRequiredService<RedisClient>();
+            Assert.IsTrue(aaa.Db.Lock("admin_lock",Environment.MachineName,100));
         }
 
 
         [Test]
         public void UnLock()
         {
-            var aaa = _serviceProvider.GetService<IPlutoRedisClient>();
-            Assert.IsTrue(aaa.UnLock("admin_lock", Environment.MachineName));
+            var aaa = _serviceProvider.GetRequiredService<RedisClient>();
+            Assert.IsTrue(aaa.Db.UnLock("admin_lock", Environment.MachineName));
         }
     }
 }
