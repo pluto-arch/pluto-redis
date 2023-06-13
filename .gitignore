@@ -352,3 +352,4 @@ MigrationBackup/
 /template/content/.idea
 /template/content/src/PlutoNetCoreTemplate.API/*.xml
 /Pluto.Redis/.idea
+/.idea

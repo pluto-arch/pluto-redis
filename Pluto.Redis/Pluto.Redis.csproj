@@ -1,22 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>net461;net50;net60</TargetFrameworks>
+	  <TargetFrameworks>net461;net50;net60;net70</TargetFrameworks>
     <Version>1.0.1</Version>
     <Description />
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.111" />
   </ItemGroup>
 
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net50'">
-		<PackageReference Include="Microsoft.Extensions.Options" Version="[5.0.0,)" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)' == 'net60'">
-		<PackageReference Include="Microsoft.Extensions.Options" Version="[6.0.0,)" />
-	</ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net50' or '$(TargetFramework)' == 'net60' or '$(TargetFramework)' == 'net70'">
+    <PackageReference Include="Microsoft.Extensions.Options" Version="[5.0.1,)" />
+  </ItemGroup>
 
 </Project>

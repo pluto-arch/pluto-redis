@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-#if NETCOREAPP
+#if !NET461
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Options;
 #endif
 
@@ -11,42 +12,38 @@ using StackExchange.Redis;
 
 namespace Pluto.Redis
 {
-    public class RedisClient : IDisposable,IAsyncDisposable
+#if !NET461
+     public class RedisClient : IDisposable,IAsyncDisposable
+#else
+    public class RedisClient : IDisposable
+#endif
     {
         private Lazy<ConnectionMultiplexer> connectionLazy = new Lazy<ConnectionMultiplexer>();
         
-        private readonly RedisClientOption _options;
+        private readonly ConfigurationOptions _options;
         private bool disposedValue;
 
-#if NETCOREAPP
         /// <summary>
         /// 初始化 <see cref="RedisClient"/> 类的新实例。
         /// </summary>
-        public RedisClient(IOptions<RedisClientOption> options)
-        {
-            _options = options.Value;
-            if (string.IsNullOrEmpty(_options.InstanceName))
-            {
-                throw new Exception("client name can not be null");
-            }
-            _ = _options.RedisAddress ?? throw new Exception("redis connect address can not be null");
-            InitConnection();
-        }
+        public RedisClient(
+#if !NET461
+            IOptions<ConfigurationOptions> options
 #else
-        /// <summary>
-        /// 初始化 <see cref="RedisClient"/> 类的新实例。
-        /// </summary>
-        public RedisClient(RedisClientOption options)
+            ConfigurationOptions options
+#endif         
+            )
         {
+            
+#if NETCOREAPP
+             _options = options.Value;
+             _ = options.Value ?? throw new ArgumentNullException("options can not be null");
+#else
             _options = options;
-            if (string.IsNullOrEmpty(_options.InstanceName))
-            {
-                throw new Exception("client name can not be null");
-            }
-            _ = _options.RedisAddress ?? throw new Exception("redis connect address can not be null");
+            _ = options ?? throw new ArgumentNullException("options can not be null");
+#endif 
             InitConnection();
         }
-#endif
         
 
         void InitConnection()
@@ -55,24 +52,7 @@ namespace Pluto.Redis
         }
         ConnectionMultiplexer GetConnection()
         {
-            var option = new ConfigurationOptions();
-            foreach (var item in _options.RedisAddress)
-            {
-                option.EndPoints.Add(item.Key,item.Value);
-            }
-
-            option.CommandMap = _options.CommandMap??CommandMap.Default;
-            option.AbortOnConnectFail = false;
-            option.Password = _options.Password;
-            option.AllowAdmin = _options.AllowAdmin;
-            option.KeepAlive = _options.KeepAlive;
-            option.AbortOnConnectFail = false;
-            option.ClientName = _options.InstanceName;
-            option.SyncTimeout = _options.SyncTimeout;
-            option.ConnectTimeout = _options.ConnectTimeout;
-            option.DefaultVersion = _options.Version??new Version(3, 0);
-            option.ServiceName = _options.MasterName;
-            return ConnectionMultiplexer.Connect(option);
+            return ConnectionMultiplexer.Connect(_options);
         }
 
 
@@ -85,7 +65,7 @@ namespace Pluto.Redis
         {
             get
             {
-                if (index is < 0 or > 16)
+                if (index < 0 || index > 16)
                 {
                     throw new IndexOutOfRangeException(nameof(index));
                 }
@@ -101,7 +81,7 @@ namespace Pluto.Redis
         /// <returns></returns>
         public IDatabase GetDatabase()
         {
-            return connectionLazy.Value.GetDatabase(_options.DefaultDataBase);
+            return connectionLazy.Value.GetDatabase(_options.DefaultDatabase??0);
         }
 
         /// <summary>
@@ -148,11 +128,14 @@ namespace Pluto.Redis
             GC.SuppressFinalize(this);
         }
 
+#if NETCOREAPP
         public ValueTask DisposeAsync()
         {
             this.Dispose(true);
             return ValueTask.CompletedTask;
         }
+#endif
+       
 
         #endregion
 
