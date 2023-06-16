@@ -12,10 +12,21 @@ using StackExchange.Redis;
 
 namespace Pluto.Redis
 {
+
+
+    public interface IRedisClient
+    {
+        IDatabase Db{get;}
+
+        string Name{get;}
+    }
+
+
+
 #if !NET461
-     public class RedisClient : IDisposable,IAsyncDisposable
+     public class RedisClient : IRedisClient,IDisposable,IAsyncDisposable
 #else
-    public class RedisClient : IDisposable
+    public class RedisClient : IRedisClient,IDisposable
 #endif
     {
         private Lazy<ConnectionMultiplexer> connectionLazy = new Lazy<ConnectionMultiplexer>();
@@ -26,22 +37,10 @@ namespace Pluto.Redis
         /// <summary>
         /// 初始化 <see cref="RedisClient"/> 类的新实例。
         /// </summary>
-        public RedisClient(
-#if !NET461
-            IOptions<ConfigurationOptions> options
-#else
-            ConfigurationOptions options
-#endif         
-            )
+        public RedisClient(ConfigurationOptions options)
         {
-            
-#if NETCOREAPP
-             _options = options.Value;
-             _ = options.Value ?? throw new ArgumentNullException("options can not be null");
-#else
             _options = options;
             _ = options ?? throw new ArgumentNullException("options can not be null");
-#endif 
             InitConnection();
         }
         
@@ -59,6 +58,8 @@ namespace Pluto.Redis
         public IDatabase Db => GetDatabase();
 
         public ISubscriber Sub => connectionLazy.Value.GetSubscriber();
+        
+        public string Name => _options.ClientName;
 
 
         public IDatabase this[int index]

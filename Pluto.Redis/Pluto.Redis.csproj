@@ -12,7 +12,7 @@
 
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net50' or '$(TargetFramework)' == 'net60' or '$(TargetFramework)' == 'net70'">
-    <PackageReference Include="Microsoft.Extensions.Options" Version="[5.0.1,)" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="[5.0.0,)" />
   </ItemGroup>
 
 </Project>

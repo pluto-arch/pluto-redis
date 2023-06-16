@@ -5,6 +5,16 @@ VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pluto.Redis", "Pluto.Redis\Pluto.Redis.csproj", "{38E696F2-7786-4AAA-8EC2-DAB4C3441BC4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A8FF6C7F-5FB9-4359-825D-B1B494AB0397}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{54598922-CAD7-4DE0-A3E8-1359E933DFB1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "test\Test\Test.csproj", "{CDBF7B6F-99D9-4031-9A17-72C30DB0D840}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTest", "test\WebTest\WebTest.csproj", "{5002453D-E289-44CE-ACD6-B155006D32A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrameworkTest", "test\FrameworkTest\FrameworkTest.csproj", "{A3AEC927-925D-4CAA-BDE1-5C4156512BCD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +25,27 @@ Global
 		{38E696F2-7786-4AAA-8EC2-DAB4C3441BC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38E696F2-7786-4AAA-8EC2-DAB4C3441BC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38E696F2-7786-4AAA-8EC2-DAB4C3441BC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDBF7B6F-99D9-4031-9A17-72C30DB0D840}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDBF7B6F-99D9-4031-9A17-72C30DB0D840}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDBF7B6F-99D9-4031-9A17-72C30DB0D840}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDBF7B6F-99D9-4031-9A17-72C30DB0D840}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5002453D-E289-44CE-ACD6-B155006D32A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5002453D-E289-44CE-ACD6-B155006D32A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5002453D-E289-44CE-ACD6-B155006D32A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5002453D-E289-44CE-ACD6-B155006D32A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3AEC927-925D-4CAA-BDE1-5C4156512BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3AEC927-925D-4CAA-BDE1-5C4156512BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3AEC927-925D-4CAA-BDE1-5C4156512BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3AEC927-925D-4CAA-BDE1-5C4156512BCD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{38E696F2-7786-4AAA-8EC2-DAB4C3441BC4} = {A8FF6C7F-5FB9-4359-825D-B1B494AB0397}
+		{CDBF7B6F-99D9-4031-9A17-72C30DB0D840} = {54598922-CAD7-4DE0-A3E8-1359E933DFB1}
+		{5002453D-E289-44CE-ACD6-B155006D32A0} = {54598922-CAD7-4DE0-A3E8-1359E933DFB1}
+		{A3AEC927-925D-4CAA-BDE1-5C4156512BCD} = {54598922-CAD7-4DE0-A3E8-1359E933DFB1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93B46B4F-7A03-4B20-A486-146484886E82}
