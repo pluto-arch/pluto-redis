@@ -52,9 +52,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 
-app.MapGet("/users", async ([FromServices]RedisClientFactory redisClientFactory) =>
+app.MapGet("/users", async ([FromServices]IRedisClient redis01) =>
 {
-    var redis01 = redisClientFactory["docker01"];
     await redis01.Db.StringSetAsync("demoA","123123",TimeSpan.FromMinutes(3));
     return Results.Ok("demoA");
 

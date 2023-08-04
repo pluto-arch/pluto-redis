@@ -1,3 +1,5 @@
+#if NETCOREAPP
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,3 +18,4 @@ namespace Pluto.Redis
         public IRedisClient this[string index] => _clients.FirstOrDefault(x => x.Name == index);
     }
 }
+#endif
