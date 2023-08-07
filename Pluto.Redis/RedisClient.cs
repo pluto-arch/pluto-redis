@@ -71,7 +71,7 @@ namespace Pluto.Redis
                     throw new IndexOutOfRangeException(nameof(index));
                 }
 
-                return connectionLazy.Value.GetDatabase(index);
+                return GetDatabase(index);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Pluto.Redis
         /// 获取redis db
         /// </summary>
         /// <returns></returns>
-        public IDatabase GetDatabase()
+        private IDatabase GetDatabase()
         {
             return connectionLazy.Value.GetDatabase(_options.DefaultDatabase??0);
         }
@@ -89,12 +89,11 @@ namespace Pluto.Redis
         /// 获取redis db
         /// </summary>
         /// <returns></returns>
-        public IDatabase GetDatabase(int dbNumber)
+        private IDatabase GetDatabase(int dbNumber)
         {
             return connectionLazy.Value.GetDatabase(dbNumber);
         }
 
-        
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

@@ -27,15 +27,18 @@ namespace Pluto.Redis.Extensions
         /// <returns>返回是否执行成功。</returns>
         public static bool Set(this IDatabase db, string key, string value, int seconds) => db.StringSet(key, value, TimeSpan.FromSeconds(seconds));
 
+      
         /// <summary>
-        /// 添加一个对象。
+        /// 添加一个对象
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="db"></param>
         /// <param name="key"></param>
+        /// <param name="data"></param>
         /// <param name="serializeFunc"></param>
         /// <param name="expiry"></param>
         /// <returns></returns>
-        public static bool Set(this IDatabase db, string key, Func<string> serializeFunc, TimeSpan? expiry = null) => db.StringSet(key, serializeFunc.Invoke(), expiry);
+        public static bool Set<T>(this IDatabase db, string key, T data, Func<T, string> serializeFunc, TimeSpan? expiry = null) => db.StringSet(key, serializeFunc.Invoke(data), expiry);
 
 
         /// <summary>
@@ -43,10 +46,11 @@ namespace Pluto.Redis.Extensions
         /// </summary>
         /// <param name="db"></param>
         /// <param name="key"></param>
+        /// <param name="data"></param>
         /// <param name="serializeFunc"></param>
         /// <param name="seconds"></param>
         /// <returns></returns>
-        public static bool Set(this IDatabase db, string key, Func<string> serializeFunc, int seconds) => db.StringSet(key, serializeFunc.Invoke(), TimeSpan.FromSeconds(seconds));
+        public static bool Set<T>(this IDatabase db, string key, T data, Func<T, string> serializeFunc, int seconds) => db.StringSet(key, serializeFunc.Invoke(data), TimeSpan.FromSeconds(seconds));
 
         /// <summary>
         /// 获取一个对象。
@@ -126,27 +130,33 @@ namespace Pluto.Redis.Extensions
         public static async Task<bool> SetAsync(this IDatabase db, string key, string value, int seconds)
             => await db.StringSetAsync(key, value, TimeSpan.FromSeconds(seconds));
 
+
         /// <summary>
-        /// 异步添加一个对象。
+        /// 添加一个对象
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="db"></param>
         /// <param name="key"></param>
+        /// <param name="data"></param>
+        /// <param name="serializeFunc"></param>
+        /// <param name="expiry"></param>
+        /// <returns></returns>
+        public static async Task<bool> SetAsync<T>(this IDatabase db, string key,T data, Func<T,string> serializeFunc, TimeSpan? expiry=null) => await db.StringSetAsync(key, serializeFunc.Invoke(data), expiry);
+
+
+        /// <summary>
+        /// 添加一个对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="key"></param>
+        /// <param name="data"></param>
         /// <param name="serializeFunc"></param>
         /// <param name="second"></param>
         /// <returns></returns>
-        public static async Task<bool> SetAsync(this IDatabase db, string key, Func<string> serializeFunc,int second) => await db.StringSetAsync(key, serializeFunc.Invoke(),TimeSpan.FromSeconds(second));
+        public static async Task<bool> SetAsync<T>(this IDatabase db, string key,T data, Func<T,string> serializeFunc, int second) => await db.StringSetAsync(key, serializeFunc.Invoke(data), TimeSpan.FromSeconds(second));
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <typeparam name="T">对象的类型。</typeparam>
-        ///// <param name="key">值。</param>
-        ///// <returns>返回对象的值。</returns>
-        ///// <example>
-        ///// client.GetAsync<User>("key",(strValue)=>JsonConvert.Deserialize<User>(strValue))
-        ///// </example>
-        /////
-        
+
         /// <summary>
         /// 异步获取一个对象。
         /// </summary>
@@ -158,7 +168,7 @@ namespace Pluto.Redis.Extensions
         public static async Task<T> GetAsync<T>(this IDatabase db, string key, Func<string, T> callback) => callback.Invoke(await db.StringGetAsync(key));
 
         /// <summary>
-        /// 
+        /// 获取数据
         /// </summary>
         /// <param name="db"></param>
         /// <param name="key">值。</param>
@@ -166,7 +176,7 @@ namespace Pluto.Redis.Extensions
         public static async Task<string> GetAsync(this IDatabase db, string key) => await db.StringGetAsync(key);
 
         /// <summary>
-        /// 异步删除一个对象。
+        /// 删除一个对象。
         /// </summary>
         /// <param name="db"></param>
         /// <param name="key">键。</param>
@@ -174,7 +184,7 @@ namespace Pluto.Redis.Extensions
         public static async Task<bool> DeleteAsync(this IDatabase db, string key) => await db.KeyDeleteAsync(key);
 
         /// <summary>
-        /// 异步设置一个键的过期时间。
+        /// 设置一个键的过期时间。
         /// </summary>
         /// <param name="db"></param>
         /// <param name="key">键。</param>
@@ -183,7 +193,7 @@ namespace Pluto.Redis.Extensions
         public static async Task<bool> SetExpireAsync(this IDatabase db, string key, int seconds) => await db.KeyExpireAsync(key, TimeSpan.FromSeconds(seconds));
 
         /// <summary>
-        /// 异步设置一个键的过期时间。
+        /// 设置一个键的过期时间。
         /// </summary>
         /// <param name="db"></param>
         /// <param name="key">键。</param>
@@ -209,6 +219,7 @@ namespace Pluto.Redis.Extensions
         /// <summary>
         /// 释放锁。
         /// </summary>
+        /// <param name="db"></param>
         /// <param name="token"></param>
         /// <param name="key">锁名称。</param>
         /// <returns>是否成功。</returns>
@@ -246,12 +257,12 @@ namespace Pluto.Redis.Extensions
 
     public static class RedisPubSubOperates
     {
-        public static long Publish(this ISubscriber subscriber, string channel,Func<string> serializaFun)
+        public static long Publish(this ISubscriber subscriber, string channel, Func<string> serializaFun)
         {
             return subscriber.Publish(channel, serializaFun.Invoke());
         }
 
-        public static void Subscribe(this ISubscriber subscriber, string subChannel,Action<RedisChannel,string> callback)
+        public static void Subscribe(this ISubscriber subscriber, string subChannel, Action<RedisChannel, string> callback)
         {
             subscriber.Subscribe(subChannel, (channel, message) =>
             {
@@ -265,7 +276,7 @@ namespace Pluto.Redis.Extensions
         /// </summary>
         /// <param name="subscriber"></param>
         /// <param name="channel"></param>
-        public static void Unsubscribe(this ISubscriber subscriber,string channel)
+        public static void Unsubscribe(this ISubscriber subscriber, string channel)
         {
             subscriber.Unsubscribe(channel);
         }

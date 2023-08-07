@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Pluto.Redis;
 using Pluto.Redis.Extensions;
 using StackExchange.Redis;
+using System.Text.Json;
 using WebTest;
 using WebTest.Models;
 
@@ -55,6 +56,9 @@ app.UseHttpsRedirection();
 app.MapGet("/users", async ([FromServices]IRedisClient redis01) =>
 {
     await redis01.Db.StringSetAsync("demoA","123123",TimeSpan.FromMinutes(3));
+
+    var red=redis01.Db.GetAsync<object>("",x=>JsonSerializer.Deserialize<object>(x));
+
     return Results.Ok("demoA");
 
 }).WithName("redsi01");
