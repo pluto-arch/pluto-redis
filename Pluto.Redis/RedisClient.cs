@@ -27,6 +27,7 @@ namespace Dotnetydd.StackExchangeRedis
         private readonly ConfigurationOptions _options;
         private bool disposedValue;
 
+
         /// <summary>
         /// 初始化 <see cref="RedisClient"/> 类的新实例。
         /// </summary>
@@ -38,12 +39,30 @@ namespace Dotnetydd.StackExchangeRedis
         }
 
 
+
+        private readonly string _configString;
+        private readonly Action<ConfigurationOptions> _confAction;
+        /// <summary>
+        /// 初始化 <see cref="RedisClient"/> 类的新实例。
+        /// </summary>
+        public RedisClient(string configuration,Action<ConfigurationOptions> options)
+        {
+            _confAction = options;
+            _configString = configuration;
+            InitConnection();
+        }
+
+
         void InitConnection()
         {
             connectionLazy = new Lazy<ConnectionMultiplexer>(GetConnection);
         }
         ConnectionMultiplexer GetConnection()
         {
+            if (!string.IsNullOrEmpty(_configString))
+            {
+                return ConnectionMultiplexer.Connect(_configString,_confAction);
+            }
             return ConnectionMultiplexer.Connect(_options);
         }
 

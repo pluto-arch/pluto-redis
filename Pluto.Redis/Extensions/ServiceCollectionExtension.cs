@@ -39,6 +39,19 @@ namespace Dotnetydd.StackExchangeRedis.Extensions
             });
             return services;
         }
+
+        /// <summary>
+        /// 注入redis
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddRedisClient(this IServiceCollection services,string configuration, Action<ConfigurationOptions> options=null)
+        {
+            services.AddSingleton<IRedisClient, RedisClient>(_ => new RedisClient(configuration,options));
+            return services;
+        }
+
     }
 
 }
