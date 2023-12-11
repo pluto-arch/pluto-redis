@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pluto.Redis", "Pluto.Redis\Pluto.Redis.csproj", "{38E696F2-7786-4AAA-8EC2-DAB4C3441BC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnetydd.StackExchangeRedis", "Pluto.Redis\Dotnetydd.StackExchangeRedis.csproj", "{38E696F2-7786-4AAA-8EC2-DAB4C3441BC4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A8FF6C7F-5FB9-4359-825D-B1B494AB0397}"
 EndProject

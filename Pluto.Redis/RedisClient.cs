@@ -1,36 +1,29 @@
-﻿using System;
+﻿
+using System;
 using System.Threading.Tasks;
-
-#if !NET461
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Options;
-#endif
-
-
-using Pluto.Redis.Options;
 using StackExchange.Redis;
 
-namespace Pluto.Redis
+namespace Dotnetydd.StackExchangeRedis
 {
 
 
     public interface IRedisClient
     {
-        IDatabase Db{get;}
+        IDatabase Db { get; }
 
-        string Name{get;}
+        string Name { get; }
     }
 
 
 
 #if !NET461
-     public class RedisClient : IRedisClient,IDisposable,IAsyncDisposable
+    public class RedisClient : IRedisClient, IDisposable, IAsyncDisposable
 #else
-    public class RedisClient : IRedisClient,IDisposable
+    public class RedisClient : IRedisClient, IDisposable
 #endif
     {
         private Lazy<ConnectionMultiplexer> connectionLazy = new Lazy<ConnectionMultiplexer>();
-        
+
         private readonly ConfigurationOptions _options;
         private bool disposedValue;
 
@@ -43,7 +36,7 @@ namespace Pluto.Redis
             _ = options ?? throw new ArgumentNullException("options can not be null");
             InitConnection();
         }
-        
+
 
         void InitConnection()
         {
@@ -58,7 +51,7 @@ namespace Pluto.Redis
         public IDatabase Db => GetDatabase();
 
         public ISubscriber Sub => connectionLazy.Value.GetSubscriber();
-        
+
         public string Name => _options.ClientName;
 
 
@@ -82,7 +75,7 @@ namespace Pluto.Redis
         /// <returns></returns>
         private IDatabase GetDatabase()
         {
-            return connectionLazy.Value.GetDatabase(_options.DefaultDatabase??0);
+            return connectionLazy.Value.GetDatabase(_options.DefaultDatabase ?? 0);
         }
 
         /// <summary>
@@ -113,7 +106,7 @@ namespace Pluto.Redis
 
         #region dispose
 
-        
+
         // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
         // ~PlutoRedisClient()
         // {
@@ -131,11 +124,11 @@ namespace Pluto.Redis
 #if NETCOREAPP
         public ValueTask DisposeAsync()
         {
-            this.Dispose(true);
+            Dispose(true);
             return ValueTask.CompletedTask;
         }
 #endif
-       
+
 
         #endregion
 

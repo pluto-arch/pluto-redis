@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-
+﻿
 #if !NET461
+
+using System;
 using Microsoft.Extensions.DependencyInjection;
+using Pluto.Redis;
 using StackExchange.Redis;
-#endif
 
-using Pluto.Redis.Options;
-
-namespace Pluto.Redis.Extensions
+namespace Dotnetydd.StackExchangeRedis.Extensions
 {
-#if !NET461
     public static class ServiceCollectionExtension
     {
 
@@ -26,25 +21,25 @@ namespace Pluto.Redis.Extensions
         {
             services.AddSingleton<RedisClientFactory>();
             return services;
-        } 
-        
+        }
+
         /// <summary>
         /// 注入redis
         /// </summary>
         /// <param name="services"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static IServiceCollection AddRedisClient(this IServiceCollection services,Action<ConfigurationOptions> options)
+        public static IServiceCollection AddRedisClient(this IServiceCollection services, Action<ConfigurationOptions> options)
         {
-            services.AddSingleton<IRedisClient,RedisClient>(_ =>
+            services.AddSingleton<IRedisClient, RedisClient>(_ =>
             {
                 var o = new ConfigurationOptions();
                 options.Invoke(o);
                 return new RedisClient(o);
             });
             return services;
-        } 
+        }
     }
-#endif
 
 }
+#endif

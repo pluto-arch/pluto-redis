@@ -1,5 +1,6 @@
 #if NETCOREAPP
 
+using Dotnetydd.StackExchangeRedis;
 using System.Collections.Generic;
 using System.Linq;
 

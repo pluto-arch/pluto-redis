@@ -1,10 +1,10 @@
+using Dotnetydd.StackExchangeRedis;
+using Dotnetydd.StackExchangeRedis.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Pluto.Redis;
-using Pluto.Redis.Extensions;
 using StackExchange.Redis;
 using System.Text.Json;
 using WebTest;
-using WebTest.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

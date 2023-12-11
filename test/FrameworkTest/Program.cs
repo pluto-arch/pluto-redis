@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Pluto.Redis;
+using Dotnetydd.StackExchangeRedis;
 using StackExchange.Redis;
 
 namespace FrameworkTest

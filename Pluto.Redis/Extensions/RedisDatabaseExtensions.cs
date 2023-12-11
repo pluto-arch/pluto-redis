@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace Pluto.Redis.Extensions
+namespace Dotnetydd.StackExchangeRedis.Extensions
 {
     public static class RedisStringOperates
     {
@@ -27,7 +27,7 @@ namespace Pluto.Redis.Extensions
         /// <returns>返回是否执行成功。</returns>
         public static bool Set(this IDatabase db, string key, string value, int seconds) => db.StringSet(key, value, TimeSpan.FromSeconds(seconds));
 
-      
+
         /// <summary>
         /// 添加一个对象
         /// </summary>
@@ -141,7 +141,7 @@ namespace Pluto.Redis.Extensions
         /// <param name="serializeFunc"></param>
         /// <param name="expiry"></param>
         /// <returns></returns>
-        public static async Task<bool> SetAsync<T>(this IDatabase db, string key,T data, Func<T,string> serializeFunc, TimeSpan? expiry=null) => await db.StringSetAsync(key, serializeFunc.Invoke(data), expiry);
+        public static async Task<bool> SetAsync<T>(this IDatabase db, string key, T data, Func<T, string> serializeFunc, TimeSpan? expiry = null) => await db.StringSetAsync(key, serializeFunc.Invoke(data), expiry);
 
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Pluto.Redis.Extensions
         /// <param name="serializeFunc"></param>
         /// <param name="second"></param>
         /// <returns></returns>
-        public static async Task<bool> SetAsync<T>(this IDatabase db, string key,T data, Func<T,string> serializeFunc, int second) => await db.StringSetAsync(key, serializeFunc.Invoke(data), TimeSpan.FromSeconds(second));
+        public static async Task<bool> SetAsync<T>(this IDatabase db, string key, T data, Func<T, string> serializeFunc, int second) => await db.StringSetAsync(key, serializeFunc.Invoke(data), TimeSpan.FromSeconds(second));
 
 
         /// <summary>

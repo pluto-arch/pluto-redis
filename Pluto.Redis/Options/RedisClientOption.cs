@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using StackExchange.Redis;
 
-namespace Pluto.Redis.Options
+namespace Dotnetydd.StackExchangeRedis.Options
 {
     public class RedisClientOption
     {

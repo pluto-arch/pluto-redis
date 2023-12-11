@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Pluto.Redis\Pluto.Redis.csproj" />
+    <ProjectReference Include="..\..\Pluto.Redis\Dotnetydd.StackExchangeRedis.csproj" />
   </ItemGroup>
 
 </Project>

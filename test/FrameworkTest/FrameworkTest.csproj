@@ -86,9 +86,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Pluto.Redis\Pluto.Redis.csproj">
+    <ProjectReference Include="..\..\Pluto.Redis\Dotnetydd.StackExchangeRedis.csproj">
       <Project>{38e696f2-7786-4aaa-8ec2-dab4c3441bc4}</Project>
-      <Name>Pluto.Redis</Name>
+      <Name>Dotnetydd.StackExchangeRedis</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
